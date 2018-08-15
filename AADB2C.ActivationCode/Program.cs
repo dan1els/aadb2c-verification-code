@@ -1,0 +1,42 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+
+namespace AADB2C.ActivationCode
+{
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            BuildWebHost(args).Run();
+        }
+
+        public static IWebHost BuildWebHost(string[] args) =>
+            WebHost.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration((webHostBuilderContext, configurationbuilder) =>
+                {
+                    // Demo: Uses the JSON configuration provider
+                    configurationbuilder
+                            .SetBasePath(Directory.GetCurrentDirectory())
+                            .AddJsonFile("appsettings.json", optional: false);
+
+                    // Demo: Configuration sources are read in the order that they're specified. 
+                    // The environment variables are read last. Any configuration values set through the environment 
+                    // replace those set in the two previous providers. 
+                    // You can use Azure App Services app settings to overwrite the settings in appsettings.json 
+                    // in following format: AppSettings:Tenant, AppSettings:ClientId and AppSettings:ClientSecret
+                    configurationbuilder.AddEnvironmentVariables();
+                    configurationbuilder.Build();
+                })
+                .UseStartup<Startup>()
+                //Demo: for local machine you may want to use this URL
+                //.UseUrls("http://localhost:51234/")
+                .Build();
+    }
+}
