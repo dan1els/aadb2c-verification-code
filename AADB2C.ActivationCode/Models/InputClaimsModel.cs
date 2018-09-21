@@ -9,7 +9,9 @@ namespace AADB2C.ActivationCode.Models
     public class InputClaimsModel
     {
         public string email { get; set; }
-        public string code { get; set; }
+
+        public string systemCode { get; set; }
+        public string userCode { get; set; }
 
         public override string ToString()
         {

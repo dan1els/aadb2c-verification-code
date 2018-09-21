@@ -73,8 +73,58 @@ namespace AADB2C.ActivationCode.Controllers
             {
                 return StatusCode((int)HttpStatusCode.Conflict, new B2CResponseModel($"General error (REST API): {ex.Message}", HttpStatusCode.Conflict));
             }
+        }
 
-            
+
+
+        [HttpPost(Name = "verifyCode")]
+        public async Task<ActionResult> verifyCode()
+        {
+            string input = null;
+
+            // If not data came in, then return
+            if (this.Request.Body == null)
+            {
+                return StatusCode((int)HttpStatusCode.Conflict, new B2CResponseModel("Request content is null", HttpStatusCode.Conflict));
+            }
+
+            // Read the input claims from the request body
+            using (StreamReader reader = new StreamReader(Request.Body, Encoding.UTF8))
+            {
+                input = await reader.ReadToEndAsync();
+            }
+
+            // Check input content value
+            if (string.IsNullOrEmpty(input))
+            {
+                return StatusCode((int)HttpStatusCode.Conflict, new B2CResponseModel("Request content is empty", HttpStatusCode.Conflict));
+            }
+
+            // Convert the input string into InputClaimsModel object
+            InputClaimsModel inputClaims = InputClaimsModel.Parse(input);
+
+            if (inputClaims == null)
+            {
+                return StatusCode((int)HttpStatusCode.Conflict, new B2CResponseModel("Can not deserialize input claims", HttpStatusCode.Conflict));
+            }
+
+            if (string.IsNullOrEmpty(inputClaims.systemCode))
+            {
+                return StatusCode((int)HttpStatusCode.Conflict, new B2CResponseModel("The 'systemCode' is null or empty", HttpStatusCode.Conflict));
+            }
+
+            if (string.IsNullOrEmpty(inputClaims.userCode))
+            {
+                return StatusCode((int)HttpStatusCode.Conflict, new B2CResponseModel("The 'userCode' is null or empty", HttpStatusCode.Conflict));
+            }
+
+
+            if (inputClaims.userCode.Trim() != inputClaims.systemCode)
+            {
+                return StatusCode((int)HttpStatusCode.Conflict, new B2CResponseModel("That code is incorrect. Please try again.", HttpStatusCode.Conflict));
+            }
+
+            return StatusCode((int)HttpStatusCode.OK, new B2CResponseModel("", HttpStatusCode.OK));
         }
 
         public void SendEmail(InputClaimsModel inputClaims, int verificationCode)
